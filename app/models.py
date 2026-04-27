@@ -122,12 +122,13 @@ class EnvironmentalData(BaseModel):
     pressure = models.FloatField(null=True, blank=True)
     wind_speed = models.FloatField(null=True, blank=True)
     wind_direction = models.FloatField(null=True, blank=True)
-    cloud_cover = models.FloatField(null=True, blank=True)
-    precipitation = models.FloatField(null=True, blank=True)
+    temperature = models.FloatField(null=True, blank=True)
     dewpoint=models.FloatField(null=True, blank=True)
     relative_humidity=models.FloatField(null=True, blank=True)
     visibility=models.FloatField(null=True, blank=True)
     wind_gust=models.FloatField(null=True, blank=True)
+    precipitation = models.FloatField(null=True, blank=True)
+    cloud_cover = models.FloatField(null=True, blank=True)
     cloud_layer=models.FloatField(null=True, blank=True)
 
     # Marine

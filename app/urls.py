@@ -25,7 +25,7 @@ urlpatterns = [
     path("conductivity/", fetch_conductivity, name='conductivity'),
     path('salinity/', fetch_salinity, name="Salinity"),
     path("currents/", fetch_currents, name="Currents"),
-    path("solar/", fetch_solar, name="Astrological"),
+    path("solar/", fetch_solar, name="Astrological")
     
 
 ]
