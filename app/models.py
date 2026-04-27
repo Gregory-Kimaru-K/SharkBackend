@@ -136,6 +136,20 @@ class EnvironmentalData(BaseModel):
     water_temperature = models.FloatField(null=True, blank=True)
     salinity=models.FloatField(null=True, blank=True)
 
+    #Solar Data
+    sunrise = models.DateTimeField(null=True, blank=True)
+    sunset = models.DateTimeField(null=True, blank=True)
+    solar_noon = models.DateTimeField(null=True, blank=True)
+    civil_twilight_begin = models.DateTimeField(null=True, blank=True)
+    civil_twilight_end = models.DateTimeField(null=True, blank=True)
+    nautical_twilight_begin = models.DateTimeField(null=True, blank=True)
+    nautical_twilight_end = models.DateTimeField(null=True, blank=True)
+    astronomical_twilight_begin = models.DateTimeField(null=True, blank=True)
+    astronomical_twilight_end = models.DateTimeField(null=True, blank=True)
+    day_length = models.CharField(max_length=30, null=True, blank=True)
+
+    moonrise = models.DateTimeField(null=True, blank=True)
+    moonset = models.DateTimeField(null=True, blank=True)
 
 ###########
 ################

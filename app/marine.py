@@ -287,3 +287,30 @@ def fetch_currents(request):
             "currents": last_curr,
         },
         status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def fetch_solar(request):
+    date_time = datetime.now(timezone.utc)
+    date_3_days_ago = (date_time - timedelta(days=3)).strftime('%Y-%m-%d')
+    header = {"User-Agent": "gregorykariara1@gmail.com"}
+    latitude = 32.78
+    longitude = -79.93
+
+    noaa = f"https://api.sunrise-sunset.org/json?lat={latitude}&lng={longitude}&date={date_3_days_ago}"
+    res = requests.get(noaa, headers=header, timeout=20).json()
+
+    results = res['results']
+    data = {}
+    
+    for key, value in results.items():
+        try:
+            dt = datetime.strptime(f'{date_3_days_ago} {value}', "%Y-%m-%d %I:%M:%S %p")
+            formatted = dt.replace(tzinfo=timezone.utc).isoformat()
+
+            data[key] = formatted
+
+        except Exception:
+            data[key] = value
+
+    return Response(data, status=status.HTTP_200_OK)
