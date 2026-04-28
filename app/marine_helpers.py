@@ -94,11 +94,6 @@ def _extract_environmental_data(observation_feature: dict) -> dict:
         cloud_cover = amount_map.get(cloud_layers[0].get("amount", ""), None)
     
     return {
-        "timestamp": props.get("timestamp"),
-        "station_id": props.get("stationId"),
-        "station_name": props.get("stationName"),
-        "location_lon": coords[0],
-        "location_lat": coords[1],
         "text_description": props.get("textDescription"),
         "raw_message": props.get("rawMessage"),
         "pressure": get_value("barometricPressure"),  # in Pa
@@ -111,8 +106,7 @@ def _extract_environmental_data(observation_feature: dict) -> dict:
         "wind_gust": get_value("windGust"),  # in km/h
         "precipitation_last_hour": get_value("precipitationLastHour"),  # in mm
         "cloud_cover": cloud_cover,  # estimated %
-        "cloud_layers": cloud_layers,
-        "raw_feature": observation_feature,  # full data for reference
+        "cloud_layers": cloud_layers[0]["base"]["value"]
     }
 
 def _fetch_weathergov_observations(latitude: float, longitude: float, date_time: datetime) -> dict:

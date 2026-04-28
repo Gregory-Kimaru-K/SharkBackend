@@ -14,6 +14,10 @@ from .marine_helpers import (
 )
 
 
+@api_view(['POST'])
+def fetch_all_environmental_data(request):
+    pass
+
 @api_view(['GET'])
 def fetch_and_store_environmental_data(request):
     """

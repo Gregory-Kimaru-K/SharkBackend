@@ -119,6 +119,8 @@ class EnvironmentalData(BaseModel):
     recorded_at_utc = models.DateTimeField()
 
     # Atmospheric
+    atmospheric_text = models.TextField(null=True, blank=True)
+    raw_message = models.TextField(null=True, blank=True)
     pressure = models.FloatField(null=True, blank=True)
     wind_speed = models.FloatField(null=True, blank=True)
     wind_direction = models.FloatField(null=True, blank=True)
@@ -127,9 +129,9 @@ class EnvironmentalData(BaseModel):
     relative_humidity=models.FloatField(null=True, blank=True)
     visibility=models.FloatField(null=True, blank=True)
     wind_gust=models.FloatField(null=True, blank=True)
-    precipitation = models.FloatField(null=True, blank=True)
+    precipitation_last_hour = models.FloatField(null=True, blank=True)
     cloud_cover = models.FloatField(null=True, blank=True)
-    cloud_layer=models.FloatField(null=True, blank=True)
+    cloud_layers=models.FloatField(null=True, blank=True)
 
     # Marine
     tide_height = models.FloatField(null=True, blank=True)
