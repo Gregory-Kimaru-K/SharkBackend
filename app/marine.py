@@ -10,7 +10,8 @@ from .marine_helpers import (
     _fetch_weathergov_observations,
     _get_closest_observation,
     _closest_station,
-    _get_closest_observation_tide
+    _get_closest_observation_tide,
+    _find_products
 )
 
 
@@ -28,22 +29,77 @@ def fetch_all_environmental_data(request):
             Fetch observations from NOAA (weather.gov) and extract environmental data.
             Query params: latitude (default 32.78), longitude (default -79.93)
         """
-        payload = _fetch_weathergov_observations(float(latitude), float(longitude), date_time)
-        observations = payload["observations"]
-        observation = _get_closest_observation(observations, date_time)
+        try:
+            payload = _fetch_weathergov_observations(float(latitude), float(longitude), date_time)
+            observations = payload["observations"]
+            observation = _get_closest_observation(observations, date_time)
 
-        if not observation:
-            return ({"error": "No observations found near target time"})
+            if not observation:
+                return (
+                    False,
+                    {
+                        "sources": 'NOAA National Weather Service API',
+                        "error": "No observations found near target time"
+                    })
 
-        # Extract structured environmental data
-        env_data = _extract_environmental_data(observation)
+            # Extract structured environmental data
+            env_data = _extract_environmental_data(observation)
 
-        return(env_data)
+            return(True, env_data)
+
+        except Exception as e:
+            return(
+                False,
+                {"error": str(e)}
+            )
     
     def other(name):
-        station_res = requests.get(station_api).json()
-        
+        try:
+            station_res = requests.get(station_api).json()
+            stations = station_res.get("stations") or []
+            count, station = _closest_station((latitude, longitude), stations)
+            if station is None:
+                return(
+                    False,
+                    {
+                        "error": "No stations returned from NOAA", "upstream": station_res
+                    })
+            station_id = station["id"]
+            params = {
+                "product": name,
+                "station": station_id,
+                "begin_date": begin_time.strftime("%Y%m%d %H:%M"),
+                "end_date": date_time.strftime("%Y%m%d %H:%M"),
+                "datum": "MLLW",
+                "units": "metric",
+                "time_zone": "gmt",
+                "application": "NOAA National Weather Service API",
+                "format": "json"
+            }
 
+            res = requests.get(api, params=params).json()
+            api_error = res.get("error")
+            if api_error:
+                return (
+                    False,
+                    {
+                        "error": api_error, "upstream": res
+                    })
+            
+            data = _get_closest_observation_tide(res, date_time)
+
+            return (
+                    True,
+                    data
+                )
+        except Exception as e:
+            return (
+                False,
+                {
+                    "error": str(e)
+                }
+            )
+    
 
 @api_view(['GET'])
 def fetch_and_store_environmental_data(request):
@@ -159,8 +215,7 @@ def fetch_water_temperature(request):
             status=status.HTTP_502_BAD_GATEWAY,
         )
 
-    data = water_temp_res.get("data") or []
-    last_temp = data[-1] if data else None
+    last_temp = _get_closest_observation_tide(water_temp_res, date_time)
 
     return Response(
         {
@@ -168,112 +223,51 @@ def fetch_water_temperature(request):
             "count": count,
             "station_id": station_id,
             "station_name": station.get("name"),
-            "water_temp": water_temp_res,
+            "water_temp": last_temp,
         },
         status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def fetch_conductivity(request):
     date_time=datetime.now(timezone.utc)
+    begin_time = date_time - timedelta(hours=6, minutes=10)
     place_coords=(32.78, -79.93)
     station_api="https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json"
-    station_res=requests.get(station_api).json()
+    stat_params = {
+        "type": 'cond'
+    }
+    station_res=requests.get(station_api, params=stat_params).json()
     stations = station_res.get("stations") or []
     count, station = _closest_station(place_coords, stations)
-    if station is None:
-        return Response(
-            {"error": "No stations returned from NOAA", "upstream": station_res},
-            status=status.HTTP_502_BAD_GATEWAY,
-        )
     station_id = station["id"]
-            
+
     api="https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
     params = {
         "product": 'conductivity',
         "station": station_id,
-        "date": "recent",
+        "begin_date": begin_time.strftime("%Y%m%d %H:%M"),
+        "end_date": date_time.strftime("%Y%m%d %H:%M"),
+        "datum": "MLLW",
         "units": "metric",
         "time_zone": "gmt",
         "application": "NOAA National Weather Service API",
         "format": "json"
     }
 
-    conductivity_res = requests.get(api, params=params).json()
+    cond_res = requests.get(api, params=params).json()
+    data = _get_closest_observation_tide(cond_res, date_time)
 
-    api_error = conductivity_res.get("error")
-    if api_error:
-        return Response(
-            {"error": api_error, "upstream": conductivity_res},
-            status=status.HTTP_502_BAD_GATEWAY,
-        )
-
-    data = conductivity_res.get("data") or []
-    last_cond = data[-1] if data else None
-
-    return Response(
-        {
-            "date_time": date_time,
-            "count": count,
-            "station_id": station_id,
-            "station_name": station.get("name"),
-            "conductivity": last_cond,
-        },
-        status=status.HTTP_200_OK)
-
-@api_view(['GET'])
-def fetch_salinity(request):
-    date_time=datetime.now(timezone.utc)
-    place_coords=(32.78, -79.93)
-    station_api="https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json"
-    station_res=requests.get(station_api).json()
-    stations = station_res.get("stations") or []
-    count, station = _closest_station(place_coords, stations)
-    if station is None:
-        return Response(
-            {"error": "No stations returned from NOAA", "upstream": station_res},
-            status=status.HTTP_502_BAD_GATEWAY,
-        )
-    station_id = station["id"]
-            
-    api="https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
-    params = {
-        "product": 'salinity',
-        "station": station_id,
-        "date": "recent",
-        "units": "metric",
-        "time_zone": "gmt",
-        "application": "NOAA National Weather Service API",
-        "format": "json"
-    }
-
-    salinity_res = requests.get(api, params=params).json()
-
-    api_error = salinity_res.get("error")
-    if api_error:
-        return Response(
-            {"error": api_error, "upstream": salinity_res},
-            status=status.HTTP_502_BAD_GATEWAY,
-        )
-
-    data = salinity_res.get("data") or []
-    last_sal = data[-1] if data else None
-
-    return Response(
-        {
-            "date_time": date_time,
-            "count": count,
-            "station_id": station_id,
-            "station_name": station.get("name"),
-            "salinity": last_sal,
-        },
-        status=status.HTTP_200_OK)
+    return Response({"station": station, "res": data}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def fetch_currents(request):
     date_time=datetime.now(timezone.utc)
     place_coords=(32.78, -79.93)
-    station_api="https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json?type=currentpredictions"
-    station_res=requests.get(station_api).json()
+    station_api="https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json"
+    stat_params = {
+        'type': 'currents'
+    }
+    station_res=requests.get(station_api, params=stat_params).json()
     stations = station_res.get("stations") or []
     count, station = _closest_station(place_coords, stations)
     if station is None:
@@ -304,8 +298,8 @@ def fetch_currents(request):
             status=status.HTTP_502_BAD_GATEWAY,
         )
 
-    data = currents_res.get("data") or []
-    last_curr = data[-1] if data else None
+    data = _get_closest_observation_tide(currents_res, date_time)
+    
 
     return Response(
         {
@@ -313,7 +307,7 @@ def fetch_currents(request):
             "count": count,
             "station_id": station_id,
             "station_name": station.get("name"),
-            "currents": last_curr,
+            "currents": data
         },
         status=status.HTTP_200_OK)
 

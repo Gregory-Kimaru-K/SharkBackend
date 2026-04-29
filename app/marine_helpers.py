@@ -45,7 +45,7 @@ def _get_closest_observation(observations, target_time):
 def _get_closest_observation_tide(observations, target_time):
     datas = observations.get("data")
     closest = None
-    
+
     smallest_delta = timedelta(minutes=60)
 
     for data in datas:
@@ -134,3 +134,17 @@ def _fetch_weathergov_observations(latitude: float, longitude: float, date_time:
         "weather_station_id": station_id,
         "observations": observations,
     }
+
+def _find_products(place_coords, stations):
+    specific_products = {}
+    for station in stations:
+        station_id = station["id"]
+        products_api = f"https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations/{station_id}/products.json"
+        res_prod = requests.get(products_api).json()
+        specific_products[station_id] = res_prod
+
+        products = res_prod["products"]
+
+
+
+    return(specific_products)

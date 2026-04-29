@@ -5,7 +5,6 @@ from .marine import (
     fetch_water_level_data,
     fetch_water_temperature,
     fetch_conductivity,
-    fetch_salinity,
     fetch_currents,
     fetch_solar
     )
@@ -23,7 +22,6 @@ urlpatterns = [
     path("tide/", fetch_water_level_data, name='Tide Data'),
     path("water_temp/", fetch_water_temperature, name='Water Temp'),
     path("conductivity/", fetch_conductivity, name='conductivity'),
-    path('salinity/', fetch_salinity, name="Salinity"),
     path("currents/", fetch_currents, name="Currents"),
     path("solar/", fetch_solar, name="Astrological")
     
