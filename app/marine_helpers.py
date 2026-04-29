@@ -1,5 +1,5 @@
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from geopy.distance import geodesic
 
 def _closest_station(place_coords, stations):
@@ -22,7 +22,7 @@ def _get_closest_observation(observations, target_time):
     features = observations.get("features")
 
     closest = None
-    smallest_delta = timedelta(minutes=60)  # max allowed
+    smallest_delta = timedelta.max  # max allowed
 
     for feature in features:
         props = feature.get("properties", {})
@@ -36,35 +36,33 @@ def _get_closest_observation(observations, target_time):
         delta = abs(obs_time - target_time)
 
         # Only consider if within 10 minutes AND closer than previous
-        if delta <= timedelta(minutes=60) and delta < smallest_delta:
+        if delta < smallest_delta:
             smallest_delta = delta
             closest = feature
 
     return closest
 
 def _get_closest_observation_tide(observations, target_time):
-    features = observations.get("features")
-
+    datas = observations.get("data")
     closest = None
-    smallest_delta = timedelta(minutes=60)  # max allowed
+    
+    smallest_delta = timedelta(minutes=60)
 
-    for feature in features:
-        props = feature.get("properties", {})
-        timestamp = props.get("timestamp")
+    for data in datas:
+        timestamp = data["t"]
         if not timestamp:
             continue
 
-        # Convert string → datetime
-        obs_time = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+        obs_time = datetime.strptime(timestamp, "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
 
-        delta = abs(obs_time - target_time)
+        delta = abs(target_time - obs_time)
 
-        # Only consider if within 10 minutes AND closer than previous
-        if delta <= timedelta(minutes=60) and delta < smallest_delta:
+        if delta < smallest_delta:
             smallest_delta = delta
-            closest = feature
+            closest = data
 
-    return closest
+
+    return ({"closest": closest, "datas": datas})
 
 def _extract_environmental_data(observation_feature: dict) -> dict:
     """

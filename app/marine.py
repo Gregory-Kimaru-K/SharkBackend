@@ -16,7 +16,34 @@ from .marine_helpers import (
 
 @api_view(['POST'])
 def fetch_all_environmental_data(request):
-    pass
+    date_time = request.get("date_time", datetime.now(timezone.utc))
+    latitude = request.get("latitude", 32.78)
+    longitude = request.get("longitude", -79.93)
+    begin_time = date_time - timedelta(hours=6, minutes=10)
+    station_api = "https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json"
+    api = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
+    
+    def atmospheric():
+        """
+            Fetch observations from NOAA (weather.gov) and extract environmental data.
+            Query params: latitude (default 32.78), longitude (default -79.93)
+        """
+        payload = _fetch_weathergov_observations(float(latitude), float(longitude), date_time)
+        observations = payload["observations"]
+        observation = _get_closest_observation(observations, date_time)
+
+        if not observation:
+            return ({"error": "No observations found near target time"})
+
+        # Extract structured environmental data
+        env_data = _extract_environmental_data(observation)
+
+        return(env_data)
+    
+    def other(name):
+        station_res = requests.get(station_api).json()
+        
+
 
 @api_view(['GET'])
 def fetch_and_store_environmental_data(request):
@@ -82,8 +109,7 @@ def fetch_water_level_data(request):
             status=status.HTTP_502_BAD_GATEWAY,
         )
 
-    data = water_level_res.get("data") or []
-    last_water_level = data[-1] if data else None
+    level = _get_closest_observation_tide(water_level_res, date_time)
 
     return Response(
         {
@@ -91,8 +117,7 @@ def fetch_water_level_data(request):
             "count": count,
             "station_id": station_id,
             "station_name": station.get("name"),
-            "last_water_level": last_water_level,
-            "water_level": water_level_res,
+            "level": level
         },
         status=status.HTTP_200_OK)
 
@@ -143,7 +168,7 @@ def fetch_water_temperature(request):
             "count": count,
             "station_id": station_id,
             "station_name": station.get("name"),
-            "water_temp": last_temp,
+            "water_temp": water_temp_res,
         },
         status=status.HTTP_200_OK)
 
