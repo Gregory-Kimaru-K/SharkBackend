@@ -134,9 +134,24 @@ class EnvironmentalData(BaseModel):
     cloud_layers=models.FloatField(null=True, blank=True)
 
     # Marine
+    ######## Tide
     tide_height = models.FloatField(null=True, blank=True)
-    tide_stage = models.CharField(max_length=50, null=True, blank=True)
+    tide_standard_deviation = models.FloatField(null=True, blank=True)
+    tide_flags = models.CharField(max_length=10, null=True, blank=True)
+    tide_quality_indicator = models.CharField(max_length=1, null=True, blank=True)
+
+    ######## Water Temperature
     water_temperature = models.FloatField(null=True, blank=True)
+    water_temperature_flags = models.CharField(max_length=10, null=True, blank=True)
+    
+    ######## Conductivity
+    conductivity = models.FloatField(null=True, blank=True)
+    conductivity_flags = models.CharField(max_length=10, null=True, blank=True)
+    
+    ######## currents
+    current_speed = models.FloatField(null=True, blank=True)
+    current_direction = models.IntegerField(null=True, blank=True)
+    current_bin_Number = models.IntegerField(null=True, blank=True)
     salinity=models.FloatField(null=True, blank=True)
 
     #Solar Data

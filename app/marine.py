@@ -10,16 +10,17 @@ from .marine_helpers import (
     _fetch_weathergov_observations,
     _get_closest_observation,
     _closest_station,
-    _get_closest_observation_tide,
-    _find_products
+    _get_closest_observation_tide
 )
 
 
 @api_view(['POST'])
 def fetch_all_environmental_data(request):
     date_time = request.data.get("date_time", datetime.now(timezone.utc))
+    print(date_time)
     latitude = request.data.get("latitude", 32.78)
     longitude = request.data.get("longitude", -79.93)
+    event = request.data.get("event")
     begin_time = date_time - timedelta(hours=6, minutes=10)
     station_api = "https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json"
     api = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
@@ -116,30 +117,39 @@ def fetch_all_environmental_data(request):
             )
     
     def solar():
-        datenow = date_time.strftime('%Y-%m-%d')
-        header ={"User-Agent": "gregorykariara1@gmail.com"}
+        try:
+            datenow = date_time.strftime('%Y-%m-%d')
+            header ={"User-Agent": "gregorykariara1@gmail.com"}
 
-        solar_api = f"https://api.sunrise-sunset.org/json?lat={latitude}&lng={longitude}&date={datenow}"
+            solar_api = f"https://api.sunrise-sunset.org/json?lat={latitude}&lng={longitude}&date={datenow}"
 
-        res = requests.get(solar_api, headers=header).json()
+            res = requests.get(solar_api, headers=header).json()
 
-        results = res["results"]
-        data = {}
+            results = res["results"]
+            data = {}
 
-        for key, value in results.items():
-            try:
-                dt = datetime.strptime(f"{datenow} {value}", "%Y-%m-%d %I:%M:%S %p")
-                formatted = dt.replace(tzinfo=timezone.utc).isoformat()
+            for key, value in results.items():
+                try:
+                    dt = datetime.strptime(f"{datenow} {value}", "%Y-%m-%d %I:%M:%S %p")
+                    formatted = dt.replace(tzinfo=timezone.utc).isoformat()
 
-                data[key] = formatted
+                    data[key] = formatted
 
-            except Exception:
-                data[key] = value
+                except Exception:
+                    data[key] = value
 
-        return (
-            True,
-            data
-        )
+            return (
+                True,
+                data
+            )
+        
+        except Exception as e:
+            return(
+                False,
+                {
+                    "error": str(e)
+                }
+            )
 
     atm_cond_success, atm_cond = atmospheric()
     level_success, water_level = other("water_level")
@@ -192,253 +202,184 @@ def fetch_all_environmental_data(request):
         for value in responses.values()
     )
 
+    try:
+        EnvironmentalData.objects.create(
+
+            event=event,
+
+            sources={
+                "atmospheric": "NOAA National Weather Service API",
+                "marine": "NOAA Tides and Currents API",
+                "solar": "Sunrise Sunset API"
+            },
+
+            recorded_at_utc=date_time,
+
+            # Atmospheric
+            atmospheric_text=successful.get(
+                "atmospheric", {}
+            ).get("text_description"),
+
+            raw_message=successful.get(
+                "atmospheric", {}
+            ).get("raw_message"),
+
+            pressure=successful.get(
+                "atmospheric", {}
+            ).get("pressure"),
+
+            wind_speed=successful.get(
+                "atmospheric", {}
+            ).get("wind_speed"),
+
+            wind_direction=successful.get(
+                "atmospheric", {}
+            ).get("wind_direction"),
+
+            temperature=successful.get(
+                "atmospheric", {}
+            ).get("temperature"),
+
+            dewpoint=successful.get(
+                "atmospheric", {}
+            ).get("dewpoint"),
+
+            relative_humidity=successful.get(
+                "atmospheric", {}
+            ).get("relative_humidity"),
+
+            visibility=successful.get(
+                "atmospheric", {}
+            ).get("visibility"),
+
+            wind_gust=successful.get(
+                "atmospheric", {}
+            ).get("wind_gust"),
+
+            precipitation_last_hour=successful.get(
+                "atmospheric", {}
+            ).get("precipitation_last_hour"),
+
+            cloud_cover=successful.get(
+                "atmospheric", {}
+            ).get("cloud_cover"),
+
+            cloud_layers=successful.get(
+                "atmospheric", {}
+            ).get("cloud_layers"),
+
+
+            # Tide
+            tide_height=successful.get(
+                "water_level", {}
+            ).get("v"),
+
+            tide_standard_deviation=successful.get(
+                "water_level", {}
+            ).get("s"),
+
+            tide_flags=successful.get(
+                "water_level", {}
+            ).get("f"),
+
+            tide_quality_indicator=successful.get(
+                "water_level", {}
+            ).get("q"),
+
+
+            # Water temperature
+            water_temperature=successful.get(
+                "water_temp", {}
+            ).get("v"),
+
+            water_temperature_flags=successful.get(
+                "water_temp", {}
+            ).get("f"),
+
+
+            # Conductivity
+            conductivity=successful.get(
+                "conductivity", {}
+            ).get("v"),
+
+            conductivity_flags=successful.get(
+                "conductivity", {}
+            ).get("f"),
+
+
+            # Currents
+            current_speed=successful.get(
+                "currents", {}
+            ).get("s"),
+
+            current_direction=successful.get(
+                "currents", {}
+            ).get("d"),
+
+            current_bin_Number=successful.get(
+                "currents", {}
+            ).get("b"),
+
+
+            # Solar
+            sunrise=successful.get(
+                "solar", {}
+            ).get("sunrise"),
+
+            sunset=successful.get(
+                "solar", {}
+            ).get("sunset"),
+
+            solar_noon=successful.get(
+                "solar", {}
+            ).get("solar_noon"),
+
+            civil_twilight_begin=successful.get(
+                "solar", {}
+            ).get("civil_twilight_begin"),
+
+            civil_twilight_end=successful.get(
+                "solar", {}
+            ).get("civil_twilight_end"),
+
+            nautical_twilight_begin=successful.get(
+                "solar", {}
+            ).get("nautical_twilight_begin"),
+
+            nautical_twilight_end=successful.get(
+                "solar", {}
+            ).get("nautical_twilight_end"),
+
+            astronomical_twilight_begin=successful.get(
+                "solar", {}
+            ).get("astronomical_twilight_begin"),
+
+            astronomical_twilight_end=successful.get(
+                "solar", {}
+            ).get("astronomical_twilight_end"),
+
+            day_length=successful.get(
+                "solar", {}
+            ).get("day_length"),
+        )
+
+    except Exception as e:
+        return Response(
+            {
+                "error": "Failed to save environmental data",
+                "detail": str(e)
+            },
+            status=status.HTTP_501_NOT_IMPLEMENTED
+        )
     return Response(
         {
             "successful": all_success,
-            "successful_requests": successful,
+            "successful": successful,
             "failed_requests": failed
         },
         status=(
-            status.HTTP_200_OK
+            status.HTTP_201_CREATED
             if all_success
             else status.HTTP_207_MULTI_STATUS
         )
     )
-
-@api_view(['GET'])
-def fetch_and_store_environmental_data(request):
-    """
-    Fetch observations from NOAA (weather.gov) and extract environmental data.
-    Query params: latitude (default 32.78), longitude (default -79.93)
-    """
-    date_time = datetime.now(timezone.utc)
-    latitude = request.query_params.get("latitude", 32.78)
-    longitude = request.query_params.get("longitude", -79.93)
-    
-    payload = _fetch_weathergov_observations(float(latitude), float(longitude), date_time)
-    observations = payload["observations"]
-    observation = _get_closest_observation(observations, date_time)
-    
-    if not observation:
-        return Response(
-            {"error": "No observations found near target time"},
-            status=status.HTTP_404_NOT_FOUND
-        )
-    
-    # Extract structured environmental data
-    env_data = _extract_environmental_data(observation)
-        
-    return Response(env_data, status=status.HTTP_200_OK)
-
-
-@api_view(['GET'])
-def fetch_water_level_data(request):
-    date_time=datetime.now(timezone.utc)
-    begin_time = date_time - timedelta(hours=6, minutes=10)
-    place_coords=(32.78, -79.93)
-    station_api="https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json"
-    station_res=requests.get(station_api).json()
-    stations = station_res.get("stations") or []
-    count, station = _closest_station(place_coords, stations)
-    if station is None:
-        return Response(
-            {"error": "No stations returned from NOAA", "upstream": station_res},
-            status=status.HTTP_502_BAD_GATEWAY,
-        )
-    station_id = station["id"]
-            
-    api="https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
-    params = {
-        "product": 'water_level',
-        "station": station_id,
-        "begin_date": begin_time.strftime("%Y%m%d %H:%M"),
-        "end_date": date_time.strftime("%Y%m%d %H:%M"),
-        "datum": "MLLW",
-        "units": "metric",
-        "time_zone": "gmt",
-        "application": "NOAA National Weather Service API",
-        "format": "json"
-    }
-
-    water_level_res = requests.get(api, params=params).json()
-
-    api_error = water_level_res.get("error")
-    if api_error:
-        return Response(
-            {"error": api_error, "upstream": water_level_res},
-            status=status.HTTP_502_BAD_GATEWAY,
-        )
-
-    level = _get_closest_observation_tide(water_level_res, date_time)
-
-    return Response(
-        {
-            "date_time": date_time,
-            "count": count,
-            "station_id": station_id,
-            "station_name": station.get("name"),
-            "level": level
-        },
-        status=status.HTTP_200_OK)
-
-@api_view(["GET"])
-def fetch_water_temperature(request):
-    date_time=datetime.now(timezone.utc)
-    begin_time = date_time - timedelta(hours=6, minutes=10)
-    place_coords=(32.78, -79.93)
-    station_api="https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json"
-    station_res=requests.get(station_api).json()
-    stations = station_res.get("stations") or []
-    count, station = _closest_station(place_coords, stations)
-    if station is None:
-        return Response(
-            {"error": "No stations returned from NOAA", "upstream": station_res},
-            status=status.HTTP_502_BAD_GATEWAY,
-        )
-    station_id = station["id"]
-            
-    api="https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
-    params = {
-        "product": 'water_temperature',
-        "station": station_id,
-        "begin_date": begin_time.strftime("%Y%m%d %H:%M"),
-        "end_date": date_time.strftime("%Y%m%d %H:%M"),
-        "datum": "MLLW",
-        "units": "metric",
-        "time_zone": "gmt",
-        "application": "NOAA National Weather Service API",
-        "format": "json"
-    }
-
-    water_temp_res = requests.get(api, params=params).json()
-
-    api_error = water_temp_res.get("error")
-    if api_error:
-        return Response(
-            {"error": api_error, "upstream": water_temp_res},
-            status=status.HTTP_502_BAD_GATEWAY,
-        )
-
-    last_temp = _get_closest_observation_tide(water_temp_res, date_time)
-
-    return Response(
-        {
-            "date_time": date_time,
-            "count": count,
-            "station_id": station_id,
-            "station_name": station.get("name"),
-            "water_temp": last_temp,
-        },
-        status=status.HTTP_200_OK)
-
-@api_view(['GET'])
-def fetch_conductivity(request):
-    date_time=datetime.now(timezone.utc)
-    begin_time = date_time - timedelta(hours=6, minutes=10)
-    place_coords=(32.78, -79.93)
-    station_api="https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json"
-    stat_params = {
-        "type": 'cond'
-    }
-    station_res=requests.get(station_api, params=stat_params).json()
-    stations = station_res.get("stations") or []
-    count, station = _closest_station(place_coords, stations)
-    station_id = station["id"]
-
-    api="https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
-    params = {
-        "product": 'conductivity',
-        "station": station_id,
-        "begin_date": begin_time.strftime("%Y%m%d %H:%M"),
-        "end_date": date_time.strftime("%Y%m%d %H:%M"),
-        "datum": "MLLW",
-        "units": "metric",
-        "time_zone": "gmt",
-        "application": "NOAA National Weather Service API",
-        "format": "json"
-    }
-
-    cond_res = requests.get(api, params=params).json()
-    data = _get_closest_observation_tide(cond_res, date_time)
-
-    return Response({"station": station, "res": data}, status=status.HTTP_200_OK)
-
-@api_view(['GET'])
-def fetch_currents(request):
-    date_time=datetime.now(timezone.utc)
-    place_coords=(32.78, -79.93)
-    station_api="https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json"
-    stat_params = {
-        'type': 'currents'
-    }
-    station_res=requests.get(station_api, params=stat_params).json()
-    stations = station_res.get("stations") or []
-
-    count, station = _closest_station(place_coords, stations)
-    if station is None:
-        return Response(
-            {"error": "No stations returned from NOAA", "upstream": station_res},
-            status=status.HTTP_502_BAD_GATEWAY,
-        )
-    station_id = station["id"]
-            
-    api="https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
-    params = {
-        "product": 'currents',
-        "station": station_id,
-        'bin': 1,
-        "date": "recent",
-        "units": "metric",
-        "time_zone": "gmt",
-        "application": "NOAA National Weather Service API",
-        "format": "json"
-    }
-
-    currents_res = requests.get(api, params=params).json()
-
-    api_error = currents_res.get("error")
-    if api_error:
-        return Response(
-            {"error": api_error, "upstream": currents_res, "station": station},
-            status=status.HTTP_502_BAD_GATEWAY,
-        )
-
-    data = _get_closest_observation_tide(currents_res, date_time)
-    
-
-    return Response(
-        {
-            "date_time": date_time,
-            "count": count,
-            "station_id": station_id,
-            "station_name": station.get("name"),
-            "currents": data
-        },
-        status=status.HTTP_200_OK)
-
-
-@api_view(['GET'])
-def fetch_solar(request):
-    date_time = datetime.now(timezone.utc)
-    date_3_days_ago = (date_time - timedelta(days=3)).strftime('%Y-%m-%d')
-    header = {"User-Agent": "gregorykariara1@gmail.com"}
-    latitude = 32.78
-    longitude = -79.93
-
-    noaa = f"https://api.sunrise-sunset.org/json?lat={latitude}&lng={longitude}&date={date_3_days_ago}"
-    res = requests.get(noaa, headers=header, timeout=20).json()
-
-    results = res['results']
-    data = {}
-    
-    for key, value in results.items():
-        try:
-            dt = datetime.strptime(f'{date_3_days_ago} {value}', "%Y-%m-%d %I:%M:%S %p")
-            formatted = dt.replace(tzinfo=timezone.utc).isoformat()
-
-            data[key] = formatted
-
-        except Exception:
-            data[key] = value
-
-    return Response(data, status=status.HTTP_200_OK)
