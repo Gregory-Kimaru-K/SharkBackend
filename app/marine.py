@@ -116,13 +116,37 @@ def fetch_all_environmental_data(request):
             )
     
     def solar():
-        pass
+        datenow = date_time.strftime('%Y-%m-%d')
+        header ={"User-Agent": "gregorykariara1@gmail.com"}
+
+        solar_api = f"https://api.sunrise-sunset.org/json?lat={latitude}&lng={longitude}&date={datenow}"
+
+        res = requests.get(solar_api, headers=header).json()
+
+        results = res["results"]
+        data = {}
+
+        for key, value in results.items():
+            try:
+                dt = datetime.strptime(f"{datenow} {value}", "%Y-%m-%d %I:%M:%S %p")
+                formatted = dt.replace(tzinfo=timezone.utc).isoformat()
+
+                data[key] = formatted
+
+            except Exception:
+                data[key] = value
+
+        return (
+            True,
+            data
+        )
 
     atm_cond_success, atm_cond = atmospheric()
     level_success, water_level = other("water_level")
     water_temp_success, water_temp = other("water_temperature")
     cond_success, cond = other('conductivity')
     curr_success, currents = other("currents")
+    solar_success, solardata = solar()
     
     responses = {
         "atmospheric": {
@@ -144,6 +168,10 @@ def fetch_all_environmental_data(request):
         "currents": {
             "success": curr_success,
             "data": currents
+        },
+        "solar": {
+            "success": solar_success,
+            'data': solardata
         }
     }
 
@@ -345,7 +373,7 @@ def fetch_currents(request):
     }
     station_res=requests.get(station_api, params=stat_params).json()
     stations = station_res.get("stations") or []
-    
+
     count, station = _closest_station(place_coords, stations)
     if station is None:
         return Response(
