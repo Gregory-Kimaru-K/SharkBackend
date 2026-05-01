@@ -62,7 +62,7 @@ def _get_closest_observation_tide(observations, target_time):
             closest = data
 
 
-    return ({"closest": closest, "datas": datas})
+    return (closest)
 
 def _extract_environmental_data(observation_feature: dict) -> dict:
     """

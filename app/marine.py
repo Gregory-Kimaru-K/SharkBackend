@@ -17,9 +17,9 @@ from .marine_helpers import (
 
 @api_view(['POST'])
 def fetch_all_environmental_data(request):
-    date_time = request.get("date_time", datetime.now(timezone.utc))
-    latitude = request.get("latitude", 32.78)
-    longitude = request.get("longitude", -79.93)
+    date_time = request.data.get("date_time", datetime.now(timezone.utc))
+    latitude = request.data.get("latitude", 32.78)
+    longitude = request.data.get("longitude", -79.93)
     begin_time = date_time - timedelta(hours=6, minutes=10)
     station_api = "https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json"
     api = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
@@ -54,8 +54,23 @@ def fetch_all_environmental_data(request):
             )
     
     def other(name):
+        station_res = None
         try:
-            station_res = requests.get(station_api).json()
+            if name == 'conductivity' or name == "currents":
+                if name == "conductivity":
+                    stat_params = {
+                        "type": "cond"
+                    }
+
+                    station_res = requests.get(station_api, params=stat_params).json()
+                else:
+                    stat_params = {
+                        'type': "currents"
+                    }
+
+                    station_res = requests.get(station_api, params=stat_params).json()
+            else:
+                station_res = requests.get(station_api).json()
             stations = station_res.get("stations") or []
             count, station = _closest_station((latitude, longitude), stations)
             if station is None:
@@ -100,6 +115,67 @@ def fetch_all_environmental_data(request):
                 }
             )
     
+    def solar():
+        pass
+
+    atm_cond_success, atm_cond = atmospheric()
+    level_success, water_level = other("water_level")
+    water_temp_success, water_temp = other("water_temperature")
+    cond_success, cond = other('conductivity')
+    curr_success, currents = other("currents")
+    
+    responses = {
+        "atmospheric": {
+            "success": atm_cond_success,
+            "data": atm_cond
+        },
+        "water_level": {
+            "success": level_success,
+            "data": water_level
+        },
+        "water_temp": {
+            "success": water_temp_success,
+            'data': water_temp
+        },
+        "conductivity": {
+            "success": cond_success,
+            "data": cond
+        },
+        "currents": {
+            "success": curr_success,
+            "data": currents
+        }
+    }
+
+    successful = {
+        key: value["data"]
+        for key, value in responses.items()
+        if value["success"]
+    }
+
+    failed = {
+        key: value["data"]
+        for key, value in responses.items()
+        if not value["success"]
+    }
+
+    all_success = all(
+        value["success"]
+        for value in responses.values()
+    )
+
+    return Response(
+        {
+            "successful": all_success,
+            "successful_requests": successful,
+            "failed_requests": failed
+        },
+        status=(
+            status.HTTP_200_OK
+            if all_success
+            else status.HTTP_207_MULTI_STATUS
+        )
+    )
 
 @api_view(['GET'])
 def fetch_and_store_environmental_data(request):
@@ -269,6 +345,7 @@ def fetch_currents(request):
     }
     station_res=requests.get(station_api, params=stat_params).json()
     stations = station_res.get("stations") or []
+    
     count, station = _closest_station(place_coords, stations)
     if station is None:
         return Response(
