@@ -91,7 +91,7 @@ class ObservationRecord(BaseModel):
         ('SENSOR', 'Sensor Device')
     ]
 
-    source_type = models.CharField(max_length=20, choices=SOURCE_TYPES)
+    source_type = models.CharField(max_length=20, choices=SOURCE_TYPES, default="USER")
     event=models.ForeignKey(Event, on_delete=models.CASCADE, related_name='observations')
     source_name=models.CharField(max_length=200)
     recorded_at_utc=models.DateTimeField()

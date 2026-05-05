@@ -27,8 +27,8 @@ class LocationType(DjangoObjectType):
             "country": ["exact", "icontains"],
             "region": ["exact", "icontains"],
             "name": ["exact", "icontains"],
-            "latitude": ["exact"],
-            "longitude": ["exact"]
+            "latitude": ["exact", "lt", "gt"],
+            "longitude": ["exact", "lt", "gt"]
         }
 
         interfaces = (graphene.relay.Node,)
@@ -46,10 +46,53 @@ class EventType(DjangoObjectType):
             "location__id": ["exact"],
             "location__country": ["exact", "icontains"],
             "location__region": ["exact", "icontains"],
+            "location__name": ["exact", "icontains"],
+            "location__latitude": ["exact", "lt", "gt"],
+            "location__longitude": ["exact", "lt", "gt"],
 
             "shark_type__id": ["exact"],
             "shark_type__name": ["exact", "icontains"],
             "shark_type__species": ["exact", "icontains"],
+
+            # Related Environmental Data (one-to-one)
+            "environmental_data__recorded_at_utc": ["exact", "lt", "gt"],
+            "environmental_data__pressure": ["exact", "lt", "gt"],
+            "environmental_data__wind_speed": ["exact", "lt", "gt"],
+            "environmental_data__wind_direction": ["exact", "lt", "gt"],
+            "environmental_data__temperature": ["exact", "lt", "gt"],
+            "environmental_data__dewpoint": ["exact", "lt", "gt"],
+            "environmental_data__relative_humidity": ["exact", "lt", "gt"],
+            "environmental_data__visibility": ["exact", "lt", "gt"],
+            "environmental_data__wind_gust": ["exact", "lt", "gt"],
+            "environmental_data__precipitation_last_hour": ["exact", "lt", "gt"],
+            "environmental_data__cloud_cover": ["exact", "lt", "gt"],
+            "environmental_data__cloud_layers": ["exact", "lt", "gt"],
+            "environmental_data__tide_height": ["exact", "lt", "gt"],
+            "environmental_data__tide_standard_deviation": ["exact", "lt", "gt"],
+            "environmental_data__tide_flags": ["exact", "icontains"],
+            "environmental_data__tide_quality_indicator": ["exact", "icontains"],
+            "environmental_data__water_temperature": ["exact", "lt", "gt"],
+            "environmental_data__water_temperature_flags": ["exact", "icontains"],
+            "environmental_data__conductivity": ["exact", "lt", "gt"],
+            "environmental_data__conductivity_flags": ["exact", "icontains"],
+            "environmental_data__current_speed": ["exact", "lt", "gt"],
+            "environmental_data__current_direction": ["exact", "lt", "gt"],
+            "environmental_data__current_bin_Number": ["exact", "lt", "gt"],
+            "environmental_data__salinity": ["exact", "lt", "gt"],
+            "environmental_data__sunrise": ["exact", "lt", "gt"],
+            "environmental_data__sunset": ["exact", "lt", "gt"],
+            "environmental_data__moonrise": ["exact", "lt", "gt"],
+            "environmental_data__moonset": ["exact", "lt", "gt"],
+
+            # Related Observations (many)
+            "observations__source_type": ["exact"],
+            "observations__source_name": ["exact", "icontains"],
+            "observations__recorded_at_utc": ["exact", "lt", "gt"],
+            "observations__payload": ["contains"],
+
+            # Related Behaviour (one-to-one)
+            "behaviour__feeding": ["exact"],
+            "behaviour__aggression": ["exact", "lt", "gt"],
 
             # Scientific Fields
             "shark_number": ["exact", "lt", "gt"],
@@ -87,24 +130,56 @@ class EnvironmentalDataType(DjangoObjectType):
         filter_fields = {
             "event__id": ["exact"],
 
+            # JSON / metadata
+            "sources": ["contains"],
+
+            # Timestamps
+            "recorded_at_utc": ["exact", "lt", "gt"],
+
             # Atmospheric
+            "atmospheric_text": ["exact", "icontains"],
+            "raw_message": ["exact", "icontains"],
             "pressure": ["exact", "lt", "gt"],
             "wind_speed": ["exact", "lt", "gt"],
             "wind_direction": ["exact", "lt", "gt"],
+            "temperature": ["exact", "lt", "gt"],
+            "dewpoint": ["exact", "lt", "gt"],
+            "relative_humidity": ["exact", "lt", "gt"],
+            "visibility": ["exact", "lt", "gt"],
+            "wind_gust": ["exact", "lt", "gt"],
+            "precipitation_last_hour": ["exact", "lt", "gt"],
             "cloud_cover": ["exact", "lt", "gt"],
-            "precipitation": ["exact", "lt", "gt"],
+            "cloud_layers": ["exact", "lt", "gt"],
 
-            # Marine
+            # Marine - Tide
             "tide_height": ["exact", "lt", "gt"],
-            "tide_stage": ["exact", "icontains"],
+            "tide_standard_deviation": ["exact", "lt", "gt"],
+            "tide_flags": ["exact", "icontains"],
+            "tide_quality_indicator": ["exact", "icontains"],
+
+            # Marine - Water / Conductivity / Currents
             "water_temperature": ["exact", "lt", "gt"],
+            "water_temperature_flags": ["exact", "icontains"],
+            "conductivity": ["exact", "lt", "gt"],
+            "conductivity_flags": ["exact", "icontains"],
+            "current_speed": ["exact", "lt", "gt"],
+            "current_direction": ["exact", "lt", "gt"],
+            "current_bin_Number": ["exact", "lt", "gt"],
             "salinity": ["exact", "lt", "gt"],
 
-            # Astronomical
-            "lunar_phase": ["exact", "icontains"],
-            "moon_illumination": ["exact", "lt", "gt"],
-
-            "recorded_at_utc": ["exact", "lt", "gt"],
+            # Solar / Astronomical datetimes
+            "sunrise": ["exact", "lt", "gt"],
+            "sunset": ["exact", "lt", "gt"],
+            "solar_noon": ["exact", "lt", "gt"],
+            "civil_twilight_begin": ["exact", "lt", "gt"],
+            "civil_twilight_end": ["exact", "lt", "gt"],
+            "nautical_twilight_begin": ["exact", "lt", "gt"],
+            "nautical_twilight_end": ["exact", "lt", "gt"],
+            "astronomical_twilight_begin": ["exact", "lt", "gt"],
+            "astronomical_twilight_end": ["exact", "lt", "gt"],
+            "day_length": ["exact", "icontains"],
+            "moonrise": ["exact", "lt", "gt"],
+            "moonset": ["exact", "lt", "gt"],
         }
 
         interfaces = (graphene.relay.Node,)
