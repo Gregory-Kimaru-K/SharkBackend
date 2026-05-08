@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from . import serializers
 from .models import Shark
-
+from .marine import fetch_all_environmental_data
 @api_view(['POST'])
 def shark_view(request):
     serializer = serializers.SharkSerializer(data=request.data)
@@ -45,21 +45,43 @@ def location_view(request):
 
 @api_view(['POST'])
 def event_view(request):
+
     serializer = serializers.EventSerializer(data=request.data)
 
     if serializer.is_valid():
 
         event = serializer.save()
 
+        try:
+
+            success, environmental_data = fetch_all_environmental_data(
+                event=event,
+                date_time=event.observed_at_utc,
+                latitude=float(event.location.latitude),
+                longitude=float(event.location.longitude)
+            )
+
+        except Exception as e:
+
+            success = False
+            environmental_data = {
+                "error": str(e)
+            }
+
         return Response(
             {
-                "message": "Event + environmental data created successfully",
-                "event": serializers.EventSerializer(event).data
+                "message": "Event created successfully",
+                "event": serializers.EventSerializer(event).data,
+                "success": success,
+                "environmental_data": environmental_data
             },
             status=status.HTTP_201_CREATED,
         )
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(
+        serializer.errors,
+        status=status.HTTP_400_BAD_REQUEST
+    )
 
 @api_view(['POST'])
 def observation_view(request):

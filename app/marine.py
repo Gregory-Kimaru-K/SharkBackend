@@ -13,14 +13,10 @@ from .marine_helpers import (
     _get_closest_observation_tide
 )
 
-
-@api_view(['POST'])
-def fetch_all_environmental_data(request):
-    date_time = request.data.get("date_time", datetime.now(timezone.utc))
+def fetch_all_environmental_data(event,
+                                 date_time=datetime.now(timezone.utc),
+                                 latitude=32.78, longitude=-79.93):
     print(date_time)
-    latitude = request.data.get("latitude", 32.78)
-    longitude = request.data.get("longitude", -79.93)
-    event = request.data.get("event")
     begin_time = date_time - timedelta(hours=6, minutes=10)
     station_api = "https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json"
     api = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
@@ -364,22 +360,18 @@ def fetch_all_environmental_data(request):
         )
 
     except Exception as e:
-        return Response(
+        return(
+            False,
             {
                 "error": "Failed to save environmental data",
                 "detail": str(e)
-            },
-            status=status.HTTP_501_NOT_IMPLEMENTED
+            }
         )
-    return Response(
+    return(
+        True,
         {
             "successful": all_success,
             "successful": successful,
             "failed_requests": failed
-        },
-        status=(
-            status.HTTP_201_CREATED
-            if all_success
-            else status.HTTP_207_MULTI_STATUS
-        )
+        }
     )
