@@ -12,6 +12,7 @@ from .marine_helpers import (
     _closest_station,
     _get_closest_observation_tide
 )
+import os
 
 def fetch_all_environmental_data(event,
                                  date_time=datetime.now(timezone.utc),
@@ -21,15 +22,15 @@ def fetch_all_environmental_data(event,
     station_api = "https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json"
     api = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
     
-    def atmospheric():
+    def atmospheric(mydatetime=date_time):
         """
             Fetch observations from NOAA (weather.gov) and extract environmental data.
             Query params: latitude (default 32.78), longitude (default -79.93)
         """
         try:
-            payload = _fetch_weathergov_observations(float(latitude), float(longitude), date_time)
+            payload = _fetch_weathergov_observations(float(latitude), float(longitude), mydatetime)
             observations = payload["observations"]
-            observation = _get_closest_observation(observations, date_time)
+            observation = _get_closest_observation(observations, mydatetime)
 
             if not observation:
                 return (
@@ -50,7 +51,7 @@ def fetch_all_environmental_data(event,
                 {"error": str(e)}
             )
     
-    def other(name):
+    def other(name, mydatetime=date_time):
         station_res = None
         try:
             if name == 'conductivity' or name == "currents":
@@ -98,7 +99,7 @@ def fetch_all_environmental_data(event,
                         "error": api_error, "upstream": res
                     })
             
-            data = _get_closest_observation_tide(res, date_time)
+            data = _get_closest_observation_tide(res, mydatetime)
 
             return (
                     True,
@@ -148,7 +149,17 @@ def fetch_all_environmental_data(event,
             )
 
     atm_cond_success, atm_cond = atmospheric()
+    atm_1hr_success, atm_1hr_prior = atmospheric(mydatetime=date_time - timedelta(hours=1))
+    atm_3hr_success, atm_3hr_prior = atmospheric(mydatetime=date_time - timedelta(hours=3))
+    atm_6hr_success, atm_6hr_prior = atmospheric(mydatetime=date_time - timedelta(hours=6))
+
+
+
     level_success, water_level = other("water_level")
+    level_1hr_success, water_level_1hr_prior = other("water_level", mydatetime=date_time - timedelta(hours=1))
+    level_3hr_success, water_level_3hr_prior = other("water_level", mydatetime=date_time - timedelta(hours=3))
+    level_6hr_success, water_level_6hr_prior = other("water_level", mydatetime=date_time - timedelta(hours=6))
+
     water_temp_success, water_temp = other("water_temperature")
     cond_success, cond = other('conductivity')
     curr_success, currents = other("currents")
@@ -157,11 +168,21 @@ def fetch_all_environmental_data(event,
     responses = {
         "atmospheric": {
             "success": atm_cond_success,
-            "data": atm_cond
+            "data": atm_cond,
+            "priors": {
+                "1hr": {"success": atm_1hr_success, "data": atm_1hr_prior},
+                "3hr": {"success": atm_3hr_success, "data": atm_3hr_prior},
+                "6hr": {"success": atm_6hr_success, "data": atm_6hr_prior}
+            }
         },
         "water_level": {
             "success": level_success,
-            "data": water_level
+            "data": water_level,
+            "priors": {
+                "1hr": {"success": level_1hr_success, "data": water_level_1hr_prior},
+                "3hr": {"success": level_3hr_success, "data": water_level_3hr_prior},
+                "6hr": {"success": level_6hr_success, "data": water_level_6hr_prior}
+            }
         },
         "water_temp": {
             "success": water_temp_success,
