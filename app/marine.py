@@ -603,6 +603,92 @@ def fetch_all_environmental_data(event,
                 "solar", {}
             ).get("day_length"),
 
+            #Lunar
+            moon_phase=successful.get(
+                "lunar", {}
+            ).get(
+                "phase", {}
+            ).get("name"),
+            phase_angle=successful.get(
+                "lunar", {}
+            ).get(
+                "phase", {}
+            ).get("phase_angle_deg"),
+
+            illumination=successful.get(
+                "lunar", {}
+            ).get(
+                "phase", {}
+            ).get("illumination"),
+
+            age_days=successful.get(
+                "lunar", {}
+            ).get(
+                "phase", {}
+            ).get("age_days"),
+
+            distance_km=successful.get(
+                "lunar", {}
+            ).get(
+                "phase", {}
+            ).get("distance_km"),
+
+            is_waxing=successful.get(
+                "lunar", {}
+            ).get(
+                "phase", {}
+            ).get("is_waxing"),
+
+            moonrise=successful.get(
+                "lunar", {}
+            ).get(
+                "rise_set", {}
+            ).get("rise"),
+
+            moonset=successful.get(
+                "lunar", {}
+            ).get(
+                "rise_set", {}
+            ).get("set"),
+
+            is_eclipse=successful.get(
+                "lunar", {}
+            ).get(
+                "eclipse", {}
+            ).get("is_eclipse"),
+
+            is_blood_moon=successful.get(
+                "lunar", {}
+            ).get(
+                "eclipse", {}
+            ).get("is_blood_moon"),
+
+            next_new_moon=successful.get(
+                "lunar", {}
+            ).get(
+                "next_phases", {}
+            ).get("new_moon"),
+
+            next_first_quarter=successful.get(
+                "lunar", {}
+            ).get(
+                "next_phases", {}
+            ).get("first_quarter"),
+
+            next_full_moon=successful.get(
+                "lunar", {}
+            ).get(
+                "next_phases", {}
+            ).get("full_moon"),
+
+            next_last_quarter=successful.get(
+                "lunar", {}
+            ).get(
+                "next_phases", {}
+            ).get("last_quarter"),
+
+
+
            # Lunar 1hr prior
             moon_phase_1hr_prior=successful.get(
                 "lunar_1hr_prior", {}
@@ -663,11 +749,6 @@ def fetch_all_environmental_data(event,
             ).get(
                 "eclipse", {}
             ).get("is_blood_moon"),
-
-            next_phases_1hr_prior=successful.get(
-                "lunar_1hr_prior", {}
-            ).get("next_phases"),
-
 
             # Lunar 3hr prior
             moon_phase_3hr_prior=successful.get(
@@ -730,11 +811,6 @@ def fetch_all_environmental_data(event,
                 "eclipse", {}
             ).get("is_blood_moon"),
 
-            next_phases_3hr_prior=successful.get(
-                "lunar_3hr_prior", {}
-            ).get("next_phases"),
-
-
             # Lunar 6hr prior
             moon_phase_6hr_prior=successful.get(
                 "lunar_6hr_prior", {}
@@ -794,11 +870,7 @@ def fetch_all_environmental_data(event,
                 "lunar_6hr_prior", {}
             ).get(
                 "eclipse", {}
-            ).get("is_blood_moon"),
-
-            next_phases_6hr_prior=successful.get(
-                "lunar_6hr_prior", {}
-            ).get("next_phases")
+            ).get("is_blood_moon")
         )
 
     except Exception as e:
