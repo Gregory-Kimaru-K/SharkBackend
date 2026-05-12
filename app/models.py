@@ -125,20 +125,72 @@ class EnvironmentalData(BaseModel):
     wind_speed = models.FloatField(null=True, blank=True)
     wind_direction = models.FloatField(null=True, blank=True)
     temperature = models.FloatField(null=True, blank=True)
-    dewpoint=models.FloatField(null=True, blank=True)
-    relative_humidity=models.FloatField(null=True, blank=True)
-    visibility=models.FloatField(null=True, blank=True)
-    wind_gust=models.FloatField(null=True, blank=True)
+    dewpoint = models.FloatField(null=True, blank=True)
+    relative_humidity = models.FloatField(null=True, blank=True)
+    visibility = models.FloatField(null=True, blank=True)
+    wind_gust = models.FloatField(null=True, blank=True)
     precipitation_last_hour = models.FloatField(null=True, blank=True)
     cloud_cover = models.FloatField(null=True, blank=True)
-    cloud_layers=models.FloatField(null=True, blank=True)
+    cloud_layers = models.FloatField(null=True, blank=True)
 
-    # Marine
-    ######## Tide
+
+    # Atmospheric 1 hour prior
+    atmospheric_text_1hr_prior = models.TextField(null=True, blank=True)
+    raw_message_1hr_prior = models.TextField(null=True, blank=True)
+    pressure_1hr_prior = models.FloatField(null=True, blank=True)
+    wind_speed_1hr_prior = models.FloatField(null=True, blank=True)
+    wind_direction_1hr_prior = models.FloatField(null=True, blank=True)
+    temperature_1hr_prior = models.FloatField(null=True, blank=True)
+    dewpoint_1hr_prior = models.FloatField(null=True, blank=True)
+    relative_humidity_1hr_prior = models.FloatField(null=True, blank=True)
+    visibility_1hr_prior = models.FloatField(null=True, blank=True)
+    wind_gust_1hr_prior = models.FloatField(null=True, blank=True)
+    precipitation_last_hour_1hr_prior = models.FloatField(null=True, blank=True)
+    cloud_cover_1hr_prior = models.FloatField(null=True, blank=True)
+    cloud_layers_1hr_prior = models.FloatField(null=True, blank=True)
+
+
+    # Atmospheric 3 hours prior
+    atmospheric_text_3hr_prior = models.TextField(null=True, blank=True)
+    raw_message_3hr_prior = models.TextField(null=True, blank=True)
+    pressure_3hr_prior = models.FloatField(null=True, blank=True)
+    wind_speed_3hr_prior = models.FloatField(null=True, blank=True)
+    wind_direction_3hr_prior = models.FloatField(null=True, blank=True)
+    temperature_3hr_prior = models.FloatField(null=True, blank=True)
+    dewpoint_3hr_prior = models.FloatField(null=True, blank=True)
+    relative_humidity_3hr_prior = models.FloatField(null=True, blank=True)
+    visibility_3hr_prior = models.FloatField(null=True, blank=True)
+    wind_gust_3hr_prior = models.FloatField(null=True, blank=True)
+    precipitation_last_hour_3hr_prior = models.FloatField(null=True, blank=True)
+    cloud_cover_3hr_prior = models.FloatField(null=True, blank=True)
+    cloud_layers_3hr_prior = models.FloatField(null=True, blank=True)
+
+    # Tide current
     tide_height = models.FloatField(null=True, blank=True)
     tide_standard_deviation = models.FloatField(null=True, blank=True)
     tide_flags = models.CharField(max_length=10, null=True, blank=True)
     tide_quality_indicator = models.CharField(max_length=1, null=True, blank=True)
+
+
+    # Tide 1 hour prior
+    tide_height_1hr_prior = models.FloatField(null=True, blank=True)
+    tide_standard_deviation_1hr_prior = models.FloatField(null=True, blank=True)
+    tide_flags_1hr_prior = models.CharField(max_length=10, null=True, blank=True)
+    tide_quality_indicator_1hr_prior = models.CharField(max_length=1, null=True, blank=True)
+
+
+    # Tide 3 hours prior
+    tide_height_3hr_prior = models.FloatField(null=True, blank=True)
+    tide_standard_deviation_3hr_prior = models.FloatField(null=True, blank=True)
+    tide_flags_3hr_prior = models.CharField(max_length=10, null=True, blank=True)
+    tide_quality_indicator_3hr_prior = models.CharField(max_length=1, null=True, blank=True)
+
+
+    # Tide 6 hours prior
+    tide_height_6hr_prior = models.FloatField(null=True, blank=True)
+    tide_standard_deviation_6hr_prior = models.FloatField(null=True, blank=True)
+    tide_flags_6hr_prior = models.CharField(max_length=10, null=True, blank=True)
+    tide_quality_indicator_6hr_prior = models.CharField(max_length=1, null=True, blank=True)
 
     ######## Water Temperature
     water_temperature = models.FloatField(null=True, blank=True)
@@ -166,8 +218,19 @@ class EnvironmentalData(BaseModel):
     astronomical_twilight_end = models.DateTimeField(null=True, blank=True)
     day_length = models.CharField(max_length=30, null=True, blank=True)
 
+    #Lunar Data
+    moon_phase=models.CharField(max_length=30, null=True, blank=True)
+    phase_angle=models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    illumination=models.DecimalField(max_digits=6, decimal_places=6, null=True, blank=True)
+    age_days=models.DecimalField(max_digits=6, decimal_places=4, null=True, blank=True)
+    distance_km=models.DecimalField(max_digits=6, decimal_places=6, null=True, blank=True)
+    is_waxing=models.BooleanField(null=True, blank=True)
     moonrise = models.DateTimeField(null=True, blank=True)
     moonset = models.DateTimeField(null=True, blank=True)
+    is_eclipse=models.BooleanField(null=True, blank=True)
+    is_blood_moon=models.BooleanField(null=True, blank=True)
+    next_phases = models.JSONField(null=True, blank=True)
+
 
 ###########
 ################

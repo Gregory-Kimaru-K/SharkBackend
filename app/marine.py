@@ -147,6 +147,38 @@ def fetch_all_environmental_data(event,
                     "error": str(e)
                 }
             )
+    
+    def lunar(mydatetime=date_time):
+        try:
+            url = "https://api.freeastroapi.com/api/v1/moon/phase"
+            headers={
+                "Content-Type": "application/json",
+                "x-api-key": os.getenv("FREEASTROAPI")
+            }
+
+            params = {
+                "date": mydatetime,
+                "lat": latitude,
+                "lon": longitude,
+                "tz_str": "AUTO",
+                "include_visuals": "false",
+                "include_zodiac": "true",
+                "include_rise_set": "true",
+                "include_interpretation": "true",
+                "include_traditional_moon": "false"
+            }
+
+            res = requests.get(url, headers=headers, params=params).json()
+            return (
+                True,
+                res
+                )
+        
+        except Exception as e:
+            return(
+                False,
+                {"error": str(e)}
+            )
 
     atm_cond_success, atm_cond = atmospheric()
     atm_1hr_success, atm_1hr_prior = atmospheric(mydatetime=date_time - timedelta(hours=1))
@@ -164,25 +196,37 @@ def fetch_all_environmental_data(event,
     cond_success, cond = other('conductivity')
     curr_success, currents = other("currents")
     solar_success, solardata = solar()
+    lunar_success, lunardata = lunar()    
     
     responses = {
         "atmospheric": {
             "success": atm_cond_success,
-            "data": atm_cond,
-            "priors": {
-                "1hr": {"success": atm_1hr_success, "data": atm_1hr_prior},
-                "3hr": {"success": atm_3hr_success, "data": atm_3hr_prior},
-                "6hr": {"success": atm_6hr_success, "data": atm_6hr_prior}
-            }
+            "data": atm_cond
         },
+        "atmospheric_1hr_prior": {
+            "success": atm_1hr_success, 
+            "data": atm_1hr_prior
+        },
+        "atmospheric_3hr_prior": {
+            "success": atm_3hr_success,
+            "data": atm_3hr_prior
+        },
+
         "water_level": {
             "success": level_success,
             "data": water_level,
-            "priors": {
-                "1hr": {"success": level_1hr_success, "data": water_level_1hr_prior},
-                "3hr": {"success": level_3hr_success, "data": water_level_3hr_prior},
-                "6hr": {"success": level_6hr_success, "data": water_level_6hr_prior}
-            }
+        },
+         "water_level_1hr_prior": {
+            "success": level_1hr_success,
+            "data": water_level_1hr_prior
+        },
+        "water_level_3hr_prior": {
+            "success": level_3hr_success,
+            "data": water_level_3hr_prior
+        },
+        "water_level_6hr_prior": {
+            "success": level_6hr_success, 
+            "data": water_level_6hr_prior
         },
         "water_temp": {
             "success": water_temp_success,
@@ -199,6 +243,10 @@ def fetch_all_environmental_data(event,
         "solar": {
             "success": solar_success,
             'data': solardata
+        },
+        "lunar": {
+            "success": lunar_success,
+            "data": lunardata
         }
     }
 
