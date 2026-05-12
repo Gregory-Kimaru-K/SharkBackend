@@ -22,7 +22,7 @@ def _get_closest_observation(observations, target_time):
     features = observations.get("features")
 
     closest = None
-    smallest_delta = timedelta.max  # max allowed
+    smallest_delta = timedelta(minutes=75)  # max allowed
 
     for feature in features:
         props = feature.get("properties", {})
@@ -46,7 +46,7 @@ def _get_closest_observation_tide(observations, target_time):
     datas = observations.get("data")
     closest = None
 
-    smallest_delta = timedelta(minutes=60)
+    smallest_delta = timedelta(minutes=72)
 
     for data in datas:
         timestamp = data["t"]

@@ -181,9 +181,8 @@ def fetch_all_environmental_data(event,
             )
 
     atm_cond_success, atm_cond = atmospheric()
-    atm_1hr_success, atm_1hr_prior = atmospheric(mydatetime=date_time - timedelta(hours=1))
+    atm_1hr_success, atm_1hr_prior = atmospheric(mydatetime=date_time - timedelta(minutes=50))
     atm_3hr_success, atm_3hr_prior = atmospheric(mydatetime=date_time - timedelta(hours=3))
-    atm_6hr_success, atm_6hr_prior = atmospheric(mydatetime=date_time - timedelta(hours=6))
 
 
 
@@ -196,7 +195,13 @@ def fetch_all_environmental_data(event,
     cond_success, cond = other('conductivity')
     curr_success, currents = other("currents")
     solar_success, solardata = solar()
-    lunar_success, lunardata = lunar()    
+    lunar_success, lunardata = lunar()
+    lunar_1hr_success, lunar1hrdata = lunar(mydatetime=date_time - timedelta(hours=1))
+    lunar_3hr_success, lunar3hrdata = lunar(mydatetime=date_time - timedelta(hours=3))
+    lunar_6hr_success, lunar6hrdata = lunar(mydatetime=date_time - timedelta(hours=6))
+
+
+
     
     responses = {
         "atmospheric": {
@@ -247,6 +252,18 @@ def fetch_all_environmental_data(event,
         "lunar": {
             "success": lunar_success,
             "data": lunardata
+        },
+        "lunar_1hr_prior": {
+            "success": lunar_1hr_success,
+            "data": lunar1hrdata
+        },
+        "lunar_3hr_prior": {
+            "success": lunar_3hr_success,
+            "data": lunar3hrdata
+        },
+        "lunar_6hr_prior": {
+            "success": lunar_6hr_success,
+            "data": lunar6hrdata
         }
     }
 
@@ -333,8 +350,114 @@ def fetch_all_environmental_data(event,
                 "atmospheric", {}
             ).get("cloud_layers"),
 
+            # Atmospheric 1hr prior
+            atmospheric_text_1hr_prior=successful.get(
+                "atmospheric_1hr_prior", {}
+            ).get("text_description"),
 
-            # Tide
+            raw_message_1hr_prior=successful.get(
+                "atmospheric_1hr_prior", {}
+            ).get("raw_message"),
+
+            pressure_1hr_prior=successful.get(
+                "atmospheric_1hr_prior", {}
+            ).get("pressure"),
+
+            wind_speed_1hr_prior=successful.get(
+                "atmospheric_1hr_prior", {}
+            ).get("wind_speed"),
+
+            wind_direction_1hr_prior=successful.get(
+                "atmospheric_1hr_prior", {}
+            ).get("wind_direction"),
+
+            temperature_1hr_prior=successful.get(
+                "atmospheric_1hr_prior", {}
+            ).get("temperature"),
+
+            dewpoint_1hr_prior=successful.get(
+                "atmospheric_1hr_prior", {}
+            ).get("dewpoint"),
+
+            relative_humidity_1hr_prior=successful.get(
+                "atmospheric_1hr_prior", {}
+            ).get("relative_humidity"),
+
+            visibility_1hr_prior=successful.get(
+                "atmospheric_1hr_prior", {}
+            ).get("visibility"),
+
+            wind_gust_1hr_prior=successful.get(
+                "atmospheric_1hr_prior", {}
+            ).get("wind_gust"),
+
+            precipitation_last_hour_1hr_prior=successful.get(
+                "atmospheric_1hr_prior", {}
+            ).get("precipitation_last_hour"),
+
+            cloud_cover_1hr_prior=successful.get(
+                "atmospheric_1hr_prior", {}
+            ).get("cloud_cover"),
+
+            cloud_layers_1hr_prior=successful.get(
+                "atmospheric_1hr_prior", {}
+            ).get("cloud_layers"),
+
+
+            # Atmospheric 3hr prior
+            atmospheric_text_3hr_prior=successful.get(
+                "atmospheric_3hr_prior", {}
+            ).get("text_description"),
+
+            raw_message_3hr_prior=successful.get(
+                "atmospheric_3hr_prior", {}
+            ).get("raw_message"),
+
+            pressure_3hr_prior=successful.get(
+                "atmospheric_3hr_prior", {}
+            ).get("pressure"),
+
+            wind_speed_3hr_prior=successful.get(
+                "atmospheric_3hr_prior", {}
+            ).get("wind_speed"),
+
+            wind_direction_3hr_prior=successful.get(
+                "atmospheric_3hr_prior", {}
+            ).get("wind_direction"),
+
+            temperature_3hr_prior=successful.get(
+                "atmospheric_3hr_prior", {}
+            ).get("temperature"),
+
+            dewpoint_3hr_prior=successful.get(
+                "atmospheric_3hr_prior", {}
+            ).get("dewpoint"),
+
+            relative_humidity_3hr_prior=successful.get(
+                "atmospheric_3hr_prior", {}
+            ).get("relative_humidity"),
+
+            visibility_3hr_prior=successful.get(
+                "atmospheric_3hr_prior", {}
+            ).get("visibility"),
+
+            wind_gust_3hr_prior=successful.get(
+                "atmospheric_3hr_prior", {}
+            ).get("wind_gust"),
+
+            precipitation_last_hour_3hr_prior=successful.get(
+                "atmospheric_3hr_prior", {}
+            ).get("precipitation_last_hour"),
+
+            cloud_cover_3hr_prior=successful.get(
+                "atmospheric_3hr_prior", {}
+            ).get("cloud_cover"),
+
+            cloud_layers_3hr_prior=successful.get(
+                "atmospheric_3hr_prior", {}
+            ).get("cloud_layers"),
+
+           # Tide current
             tide_height=successful.get(
                 "water_level", {}
             ).get("v"),
@@ -351,6 +474,59 @@ def fetch_all_environmental_data(event,
                 "water_level", {}
             ).get("q"),
 
+
+            # Tide 1hr prior
+            tide_height_1hr_prior=successful.get(
+                "water_level_1hr_prior", {}
+            ).get("v"),
+
+            tide_standard_deviation_1hr_prior=successful.get(
+                "water_level_1hr_prior", {}
+            ).get("s"),
+
+            tide_flags_1hr_prior=successful.get(
+                "water_level_1hr_prior", {}
+            ).get("f"),
+
+            tide_quality_indicator_1hr_prior=successful.get(
+                "water_level_1hr_prior", {}
+            ).get("q"),
+
+
+            # Tide 3hr prior
+            tide_height_3hr_prior=successful.get(
+                "water_level_3hr_prior", {}
+            ).get("v"),
+
+            tide_standard_deviation_3hr_prior=successful.get(
+                "water_level_3hr_prior", {}
+            ).get("s"),
+
+            tide_flags_3hr_prior=successful.get(
+                "water_level_3hr_prior", {}
+            ).get("f"),
+
+            tide_quality_indicator_3hr_prior=successful.get(
+                "water_level_3hr_prior", {}
+            ).get("q"),
+
+
+            # Tide 6hr prior
+            tide_height_6hr_prior=successful.get(
+                "water_level_6hr_prior", {}
+            ).get("v"),
+
+            tide_standard_deviation_6hr_prior=successful.get(
+                "water_level_6hr_prior", {}
+            ).get("s"),
+
+            tide_flags_6hr_prior=successful.get(
+                "water_level_6hr_prior", {}
+            ).get("f"),
+
+            tide_quality_indicator_6hr_prior=successful.get(
+                "water_level_6hr_prior", {}
+            ).get("q"),
 
             # Water temperature
             water_temperature=successful.get(
@@ -426,6 +602,203 @@ def fetch_all_environmental_data(event,
             day_length=successful.get(
                 "solar", {}
             ).get("day_length"),
+
+           # Lunar 1hr prior
+            moon_phase_1hr_prior=successful.get(
+                "lunar_1hr_prior", {}
+            ).get(
+                "phase", {}
+            ).get("name"),
+
+            phase_angle_1hr_prior=successful.get(
+                "lunar_1hr_prior", {}
+            ).get(
+                "phase", {}
+            ).get("phase_angle_deg"),
+
+            illumination_1hr_prior=successful.get(
+                "lunar_1hr_prior", {}
+            ).get(
+                "phase", {}
+            ).get("illumination"),
+
+            age_days_1hr_prior=successful.get(
+                "lunar_1hr_prior", {}
+            ).get(
+                "phase", {}
+            ).get("age_days"),
+
+            distance_km_1hr_prior=successful.get(
+                "lunar_1hr_prior", {}
+            ).get(
+                "phase", {}
+            ).get("distance_km"),
+
+            is_waxing_1hr_prior=successful.get(
+                "lunar_1hr_prior", {}
+            ).get(
+                "phase", {}
+            ).get("is_waxing"),
+
+            moonrise_1hr_prior=successful.get(
+                "lunar_1hr_prior", {}
+            ).get(
+                "rise_set", {}
+            ).get("rise"),
+
+            moonset_1hr_prior=successful.get(
+                "lunar_1hr_prior", {}
+            ).get(
+                "rise_set", {}
+            ).get("set"),
+
+            is_eclipse_1hr_prior=successful.get(
+                "lunar_1hr_prior", {}
+            ).get(
+                "eclipse", {}
+            ).get("is_eclipse"),
+
+            is_blood_moon_1hr_prior=successful.get(
+                "lunar_1hr_prior", {}
+            ).get(
+                "eclipse", {}
+            ).get("is_blood_moon"),
+
+            next_phases_1hr_prior=successful.get(
+                "lunar_1hr_prior", {}
+            ).get("next_phases"),
+
+
+            # Lunar 3hr prior
+            moon_phase_3hr_prior=successful.get(
+                "lunar_3hr_prior", {}
+            ).get(
+                "phase", {}
+            ).get("name"),
+
+            phase_angle_3hr_prior=successful.get(
+                "lunar_3hr_prior", {}
+            ).get(
+                "phase", {}
+            ).get("phase_angle_deg"),
+
+            illumination_3hr_prior=successful.get(
+                "lunar_3hr_prior", {}
+            ).get(
+                "phase", {}
+            ).get("illumination"),
+
+            age_days_3hr_prior=successful.get(
+                "lunar_3hr_prior", {}
+            ).get(
+                "phase", {}
+            ).get("age_days"),
+
+            distance_km_3hr_prior=successful.get(
+                "lunar_3hr_prior", {}
+            ).get(
+                "phase", {}
+            ).get("distance_km"),
+
+            is_waxing_3hr_prior=successful.get(
+                "lunar_3hr_prior", {}
+            ).get(
+                "phase", {}
+            ).get("is_waxing"),
+
+            moonrise_3hr_prior=successful.get(
+                "lunar_3hr_prior", {}
+            ).get(
+                "rise_set", {}
+            ).get("rise"),
+
+            moonset_3hr_prior=successful.get(
+                "lunar_3hr_prior", {}
+            ).get(
+                "rise_set", {}
+            ).get("set"),
+
+            is_eclipse_3hr_prior=successful.get(
+                "lunar_3hr_prior", {}
+            ).get(
+                "eclipse", {}
+            ).get("is_eclipse"),
+
+            is_blood_moon_3hr_prior=successful.get(
+                "lunar_3hr_prior", {}
+            ).get(
+                "eclipse", {}
+            ).get("is_blood_moon"),
+
+            next_phases_3hr_prior=successful.get(
+                "lunar_3hr_prior", {}
+            ).get("next_phases"),
+
+
+            # Lunar 6hr prior
+            moon_phase_6hr_prior=successful.get(
+                "lunar_6hr_prior", {}
+            ).get(
+                "phase", {}
+            ).get("name"),
+
+            phase_angle_6hr_prior=successful.get(
+                "lunar_6hr_prior", {}
+            ).get(
+                "phase", {}
+            ).get("phase_angle_deg"),
+
+            illumination_6hr_prior=successful.get(
+                "lunar_6hr_prior", {}
+            ).get(
+                "phase", {}
+            ).get("illumination"),
+
+            age_days_6hr_prior=successful.get(
+                "lunar_6hr_prior", {}
+            ).get(
+                "phase", {}
+            ).get("age_days"),
+
+            distance_km_6hr_prior=successful.get(
+                "lunar_6hr_prior", {}
+            ).get(
+                "phase", {}
+            ).get("distance_km"),
+
+            is_waxing_6hr_prior=successful.get(
+                "lunar_6hr_prior", {}
+            ).get(
+                "phase", {}
+            ).get("is_waxing"),
+
+            moonrise_6hr_prior=successful.get(
+                "lunar_6hr_prior", {}
+            ).get(
+                "rise_set", {}
+            ).get("rise"),
+
+            moonset_6hr_prior=successful.get(
+                "lunar_6hr_prior", {}
+            ).get(
+                "rise_set", {}
+            ).get("set"),
+
+            is_eclipse_6hr_prior=successful.get(
+                "lunar_6hr_prior", {}
+            ).get(
+                "eclipse", {}
+            ).get("is_eclipse"),
+
+            is_blood_moon_6hr_prior=successful.get(
+                "lunar_6hr_prior", {}
+            ).get(
+                "eclipse", {}
+            ).get("is_blood_moon"),
+
+            next_phases_6hr_prior=successful.get(
+                "lunar_6hr_prior", {}
+            ).get("next_phases")
         )
 
     except Exception as e:

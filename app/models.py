@@ -219,17 +219,59 @@ class EnvironmentalData(BaseModel):
     day_length = models.CharField(max_length=30, null=True, blank=True)
 
     #Lunar Data
-    moon_phase=models.CharField(max_length=30, null=True, blank=True)
-    phase_angle=models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-    illumination=models.DecimalField(max_digits=6, decimal_places=6, null=True, blank=True)
-    age_days=models.DecimalField(max_digits=6, decimal_places=4, null=True, blank=True)
-    distance_km=models.DecimalField(max_digits=6, decimal_places=6, null=True, blank=True)
-    is_waxing=models.BooleanField(null=True, blank=True)
+    moon_phase = models.CharField(max_length=30, null=True, blank=True)
+    phase_angle = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    illumination = models.DecimalField(max_digits=6, decimal_places=6, null=True, blank=True)
+    age_days = models.DecimalField(max_digits=6, decimal_places=4, null=True, blank=True)
+    distance_km = models.DecimalField(max_digits=6, decimal_places=6, null=True, blank=True)
+    is_waxing = models.BooleanField(null=True, blank=True)
     moonrise = models.DateTimeField(null=True, blank=True)
     moonset = models.DateTimeField(null=True, blank=True)
-    is_eclipse=models.BooleanField(null=True, blank=True)
-    is_blood_moon=models.BooleanField(null=True, blank=True)
+    is_eclipse = models.BooleanField(null=True, blank=True)
+    is_blood_moon = models.BooleanField(null=True, blank=True)
     next_phases = models.JSONField(null=True, blank=True)
+
+
+    # 1 hour prior
+    moon_phase_1hr_prior = models.CharField(max_length=30, null=True, blank=True)
+    phase_angle_1hr_prior = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    illumination_1hr_prior = models.DecimalField(max_digits=6, decimal_places=6, null=True, blank=True)
+    age_days_1hr_prior = models.DecimalField(max_digits=6, decimal_places=4, null=True, blank=True)
+    distance_km_1hr_prior = models.DecimalField(max_digits=6, decimal_places=6, null=True, blank=True)
+    is_waxing_1hr_prior = models.BooleanField(null=True, blank=True)
+    moonrise_1hr_prior = models.DateTimeField(null=True, blank=True)
+    moonset_1hr_prior = models.DateTimeField(null=True, blank=True)
+    is_eclipse_1hr_prior = models.BooleanField(null=True, blank=True)
+    is_blood_moon_1hr_prior = models.BooleanField(null=True, blank=True)
+    next_phases_1hr_prior = models.JSONField(null=True, blank=True)
+
+
+    # 3 hours prior
+    moon_phase_3hr_prior = models.CharField(max_length=30, null=True, blank=True)
+    phase_angle_3hr_prior = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    illumination_3hr_prior = models.DecimalField(max_digits=6, decimal_places=6, null=True, blank=True)
+    age_days_3hr_prior = models.DecimalField(max_digits=6, decimal_places=4, null=True, blank=True)
+    distance_km_3hr_prior = models.DecimalField(max_digits=6, decimal_places=6, null=True, blank=True)
+    is_waxing_3hr_prior = models.BooleanField(null=True, blank=True)
+    moonrise_3hr_prior = models.DateTimeField(null=True, blank=True)
+    moonset_3hr_prior = models.DateTimeField(null=True, blank=True)
+    is_eclipse_3hr_prior = models.BooleanField(null=True, blank=True)
+    is_blood_moon_3hr_prior = models.BooleanField(null=True, blank=True)
+    next_phases_3hr_prior = models.JSONField(null=True, blank=True)
+
+
+    # 6 hours prior
+    moon_phase_6hr_prior = models.CharField(max_length=30, null=True, blank=True)
+    phase_angle_6hr_prior = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    illumination_6hr_prior = models.DecimalField(max_digits=6, decimal_places=6, null=True, blank=True)
+    age_days_6hr_prior = models.DecimalField(max_digits=6, decimal_places=4, null=True, blank=True)
+    distance_km_6hr_prior = models.DecimalField(max_digits=6, decimal_places=6, null=True, blank=True)
+    is_waxing_6hr_prior = models.BooleanField(null=True, blank=True)
+    moonrise_6hr_prior = models.DateTimeField(null=True, blank=True)
+    moonset_6hr_prior = models.DateTimeField(null=True, blank=True)
+    is_eclipse_6hr_prior = models.BooleanField(null=True, blank=True)
+    is_blood_moon_6hr_prior = models.BooleanField(null=True, blank=True)
+    next_phases_6hr_prior = models.JSONField(null=True, blank=True)
 
 
 ###########
