@@ -21,14 +21,6 @@ def shark_view(request):
         )
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-@api_view(['GET'])
-def sharks_list_view(request):
-    sharks = Shark.objects.all().order_by('name')
-    serializer = serializers.SharkSerializer(sharks, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
-
-
 @api_view(['POST'])
 def location_view(request):
     serializer = serializers.LocationSerializer(data=request.data)

@@ -10,7 +10,7 @@ class EventFilter(django_filters.FilterSet):
             # --------------------
             "title": ["exact", "icontains"],
             "outcome": ["exact"],
-            "source_type": ["exact"],
+            "observations__source_type": ["exact"],
             "observed_at_utc": ["exact", "gte", "lte"],
             "shark_number": ["exact", "gte", "lte"],
             "is_processed": ["exact"],
@@ -98,7 +98,6 @@ class EventFilter(django_filters.FilterSet):
             # --------------------
             # NEXT PHASES (JSON)
             # --------------------
-            "environmental_data__next_phases": ["exact"],
             "environmental_data__next_new_moon": ["exact", "gte", "lte"],
             "environmental_data__next_first_quarter": ["exact", "gte", "lte"],
             "environmental_data__next_full_moon": ["exact", "gte", "lte"],

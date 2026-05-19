@@ -3,8 +3,6 @@ from . import views
 from .marine import fetch_all_environmental_data
 
 urlpatterns = [
-
-    path('sharks/', views.sharks_list_view, name='list_sharks'),
     path('shark/create/', views.shark_view, name='create_shark'),
     path('location/create/', views.location_view, name='create_location'),
     path('event/create/', views.event_view, name='create_event'),
